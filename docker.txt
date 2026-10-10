@@ -1,0 +1,24 @@
+nomachine：agx02
+密码：123
+
+解决docker权限问题:
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker镜像导入：
+docker load -i pico_v5.tar
+
+xhost +local:root
+
+docker run -it \
+  --gpus all \
+  --name pico-v5 \
+  --privileged \
+  --net=host \
+  --shm-size=64g \
+  -e PYTHONUNBUFFERED=1 \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v /dev:/dev \
+  pico:v5 \
+  /bin/bash

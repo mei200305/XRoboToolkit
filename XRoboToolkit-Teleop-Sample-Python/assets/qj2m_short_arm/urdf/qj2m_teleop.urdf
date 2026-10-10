@@ -1,0 +1,1297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="qj2m_teleop_short_arm">
+
+  <mujoco>
+    <compiler meshdir="./meshes" discardvisual="false" />
+  </mujoco>
+
+  <link name="base">
+    <inertial>
+      <origin xyz="-0.0432620441672751 -7.20384201090392E-05 -0.0157742602358368" rpy="0 0 0" />
+      <mass value="5.42336703971486" />
+      <inertia ixx="0.0158012253762779" ixy="-2.10567446516054E-05" ixz="-9.65564242947334E-05" iyy="0.00899400302210685" iyz="-1.49384272686176E-05" izz="0.0166071750550749" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//base.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.02 0.0 -0.03"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.20 0.34 0.1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="trunk_1">
+    <inertial>
+      <origin xyz="-0.0238812455871731 -2.68398381116922E-09 0.032297900810212" rpy="0 0 0" />
+      <mass value="0.708107256826163" />
+      <inertia ixx="0.00058604588898599" ixy="-2.4925314373819E-10" ixz="0.000110468770928383" iyy="0.000941103554028202" iyz="3.7254629392354E-10" izz="0.00126692828656245" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//trunk_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//trunk_1.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="1_waist_yaw" type="revolute">
+    <origin xyz="0 0 0.049" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="trunk_1" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="61"
+      velocity="3.1416" />
+  </joint>
+  <link name="trunk_2">
+    <inertial>
+      <origin xyz="-4.1305375813713E-08 -4.13053758105382E-08 -1.38777878078145E-17" rpy="0 0 0" />
+      <mass value="0.138744098694431" />
+      <inertia ixx="3.61719312022342E-05" ixy="2.36716687662295E-16" ixz="2.24603645191319E-11" iyy="3.61719312022342E-05" iyz="-1.23438253657334E-11" izz="6.27787250846235E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//trunk_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//trunk_2.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="2_waist_pitch" type="revolute">
+    <origin xyz="0 0 0.0665" rpy="0 0 0" />
+    <parent link="trunk_1" />
+    <child link="trunk_2" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-0.174532"
+      upper="0.436332"
+      effort="122"
+      velocity="3.1416" />
+  </joint>
+  <link name="trunk_3">
+    <inertial>
+      <origin xyz="-0.010316 -0.000244 0.234184" rpy="0 0 0" />
+      <mass value="14.87" />
+      <inertia ixx="0.225012843" ixy="0.00008559" ixz="-0.006515828" iyy="0.178467726" iyz="-0.000032737" izz="0.099097791" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//trunk_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0.2"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.2 0.33" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="3_waist_roll" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="trunk_2" />
+    <child link="trunk_3" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-0.174532"
+      upper="0.174532"
+      effort="74.4"
+      velocity="5.2927" />
+  </joint>
+  <link name="arml_1">
+    <inertial>
+      <origin xyz="0.00993089431602423 0.0609391416804924 5.60036026051036E-05" rpy="0 0 0" />
+      <mass value="1.02396216803474" />
+      <inertia ixx="0.00087460374084481" ixy="1.63618155229266E-05" ixz="2.13129252506516E-06" iyy="0.000871666170300782" iyz="-1.19176649977057E-06" izz="0.000911205577084467" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//arml_1.STL" />
+      </geometry>
+    </collision>  -->
+  </link>
+  <joint name="arml_1_joint" type="revolute">
+    <origin xyz="0 0.17 0.31" rpy="0 0 0" />
+    <parent link="trunk_3" />
+    <child link="arml_1" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+    <limit lower="-3.14" upper="1.57" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_2">
+    <inertial>
+      <origin xyz="-0.0511415898671281 8.32584362564504E-10 -0.0330060042061922" rpy="0 0 0" />
+      <mass value="0.189569039081004" />
+      <inertia ixx="0.00016380079419777" ixy="-4.92358985893605E-12" ixz="-6.45522238475873E-05" iyy="0.000262881440190615" iyz="2.8208512818346E-12" izz="0.000225505233952" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//arml_2.STL" />
+      </geometry>
+    </collision>  -->
+  </link>
+  <joint name="arml_2_joint" type="revolute">
+    <origin xyz="0.0564999999999998 0.067 0" rpy="0 0 0" />
+    <parent link="arml_1" />
+    <child link="arml_2" />
+    <!-- <axis xyz="-1 0 0" /> -->
+    <axis xyz="1 0 0" />
+    <limit lower="-1.3" upper="3.66" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_3">
+    <inertial>
+      <origin xyz="8.77761887577624E-05 0.000553568071263028 -0.105346428000085" rpy="0 0 0" />
+      <mass value="1.54224849274438" />
+      <inertia ixx="0.00147393906934196" ixy="-1.7458623191345E-06" ixz="4.33874816395352E-06" iyy="0.0014411205004253" iyz="-3.79433199193412E-05" izz="0.00122187553311751" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 -0.02"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.24" radius="0.04"/>
+      </geometry>
+    </collision> 
+  </link>
+  <joint name="arml_3_joint" type="revolute">
+    <origin xyz="-0.0565000000000015 0 -0.0589999999999986" rpy="0 0 0" />
+
+    <parent link="arml_2" />
+    <child link="arml_3" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_4">
+    <inertial>
+      <origin xyz="-0.00111822614656574 -0.0434219159312809 -0.0874270088371603" rpy="0 0 0" />
+      <mass value="0.55564088073442" />
+      <inertia ixx="0.000435522829875464" ixy="1.54016437142957E-07" ixz="-3.01446207810175E-06" iyy="0.000383896358949555" iyz="-2.90695123444766E-05" izz="0.000308835385324287" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 -0.04 -0.18"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.20" radius="0.04"/>
+      </geometry>
+    </collision> 
+  </link>
+  <joint name="arml_4_joint" type="revolute">
+    <origin xyz="0 0.0427000000000003 -0.186" rpy="0 0 0" />
+
+    <parent link="arml_3" />
+    <child link="arml_4" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+    <limit lower="-2.0944" upper="2.0944" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_5">
+    <inertial>
+      <origin xyz="0.0002366289309762 0.00423377896499436 -0.0344148650090182" rpy="0 0 0" />
+      <mass value="0.37125184553654" />
+      <inertia ixx="0.000223835671509755" ixy="2.58016388648214E-06" ixz="4.24812121097403E-07" iyy="0.000186693040123275" iyz="-8.27212522199524E-07" izz="0.000219913871004514" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//arml_5.STL" />
+      </geometry>
+    </collision>  -->
+  </link>
+  <joint name="arml_5_joint" type="revolute">
+    <origin xyz="0 -0.0426999999999999 -0.14" rpy="0 0 0" />
+
+    <parent link="arml_4" />
+    <child link="arml_5" />
+    <!-- <axis xyz="0 0 -1" /> -->
+    <axis xyz="0 0 1" />
+
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_6">
+    <inertial>
+      <origin xyz="0.00380132696641154 -0.0315048345184193 -0.0648587782311496" rpy="0 0 0" />
+      <mass value="0.413241480837002" />
+      <inertia ixx="0.000202770320625487" ixy="-2.60614145305209E-06" ixz="-8.18684750256201E-07" iyy="0.00024507511204856" iyz="-9.33014064582261E-06" izz="0.000232342677780107" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_6.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//arml_6.STL" />
+      </geometry>
+    </collision>  -->
+  </link>
+  <joint name="arml_6_joint" type="revolute">
+    <origin xyz="0 0.0345000000000001 -0.0350000000000001" rpy="0 0 0" />
+
+    <parent link="arml_5" />
+    <child link="arml_6" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+
+    <limit lower="-1.91" upper="1.91" effort="100" velocity="10" />
+  </joint>
+  <link name="arml_7">
+    <inertial>
+      <origin xyz="-0.02 -0.005 -0.11" rpy="0 1.5708 3.1415926" />
+      <mass value="0.057895" />
+      <inertia ixx="5.31284715940598E-04" ixy="-5.6271352740477E-09" ixz="-1.29105517884656E-05" iyy="4.78030295730659E-04" iyz="-1.11926435970279E-08" izz="2.75793820258844E-04" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 3.1415926" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//arml_7.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.04 0 -0.08"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arml_7_joint" type="revolute">
+    <origin xyz="0.034499999999996 -0.0345000000000002 -0.0700000000000011" rpy="0 0 0" />
+  
+    
+    <parent link="arml_6" />
+    <child link="arml_7" />
+    <axis
+      xyz="1 0 0" />
+
+    <limit lower="-1.4" upper="1.4" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_1">
+    <inertial>
+      <origin xyz="0.00993089446571556 -0.0609391416804924 -5.6002513688147E-05" rpy="0 0 0" />
+      <mass value="1.02396216803474" />
+      <inertia ixx="0.000874603740844806" ixy="-1.63618143393512E-05" ixz="-2.13129252506533E-06" iyy="0.000871666170300784" iyz="-1.19176263775034E-06" izz="0.000911205577084468" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//armr_1.STL" />
+      </geometry>
+    </collision>  -->
+  </link>
+  <joint name="armr_1_joint" type="revolute">
+    <origin xyz="0 -0.17 0.31" rpy="0 0 0" />
+    <parent link="trunk_3" />
+    <child link="armr_1" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+    <limit lower="-3.14" upper="1.57" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_2">
+    <inertial>
+      <origin xyz="-0.0511415898671279 8.32584251542201E-10 -0.0330060042061945" rpy="0 0 0" />
+      <mass value="0.189569039081006" />
+      <inertia ixx="0.000163800794197772" ixy="-4.92358986711906E-12" ixz="-6.45522238475873E-05" iyy="0.000262881440190619" iyz="2.8208514036986E-12" izz="0.000225505233952003" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//armr_2.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="armr_2_joint" type="revolute">
+    <origin xyz="0.0565 -0.0669999999999999 0" rpy="0 0 0" />
+    <parent link="armr_1" />
+    <child link="armr_2" />
+    <axis xyz="1 0 0" />
+    <limit lower="-3.66" upper="1.3" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_3">
+    <inertial>
+      <origin xyz="0.00012125722099898 -0.000627273763705721 -0.105346428000085" rpy="0 0 0" />
+      <mass value="1.54224849274438" />
+      <inertia ixx="0.00147393906934196" ixy="-1.74586231913126E-06" ixz="6.65807679198563E-06" iyy="0.0014411205004253" iyz="3.36797664378448E-05" izz="0.00122187553311751" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 -0.02"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.24" radius="0.04"/>
+      </geometry>
+    </collision> 
+  </link>
+  <joint name="armr_3_joint" type="revolute">
+    <origin xyz="-0.0564999999999994 0 -0.0590000000000004" rpy="0 0 0" />
+    <parent link="armr_2" />
+    <child link="armr_3" />
+    <!-- <axis xyz="0 0 -1" /> -->
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_4">
+    <inertial>
+      <origin xyz="-0.00111822189039597 0.0434996955993733 -0.0874270088371603" rpy="0 0 0" />
+      <mass value="0.555640880734417" />
+      <inertia ixx="0.000435522829875462" ixy="1.54016437143521E-07" ixz="-3.01442273225758E-06" iyy="0.000383896358949553" iyz="2.75272060875646E-05" izz="0.000308835385324285" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0.04 -0.18"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.20" radius="0.04"/>
+      </geometry>
+    </collision> 
+  </link>
+  <joint name="armr_4_joint" type="revolute">
+    <origin xyz="0 -0.0427 -0.186" rpy="0 0 0" />
+    <parent link="armr_3" />
+    <child link="armr_4" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+    <limit lower="-2.0944" upper="2.0944" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_5">
+    <inertial>
+      <origin xyz="-0.000236628930977058 -0.00423377896499433 -0.034414865009018" rpy="0 0 0" />
+      <mass value="0.371251845536539" />
+      <inertia ixx="0.000223835671509754" ixy="2.58016388648266E-06" ixz="-4.24812121097516E-07" iyy="0.000186693040123275" iyz="8.27212522199029E-07" izz="0.000219913871004514" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//armr_5.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="armr_5_joint" type="revolute">
+    <origin xyz="0 0.0427 -0.14" rpy="0 0 0" />
+    <parent link="armr_4" />
+    <child link="armr_5" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_6">
+    <inertial>
+      <origin xyz="0.00380132792169109 0.0315048331427013 -0.0647004613730221" rpy="0 0 0" />
+      <mass value="0.413241478296291" />
+      <inertia ixx="0.000202770324104729" ixy="2.60611971388495E-06" ixz="7.7437142954789E-07" iyy="0.000245075128030883" iyz="8.48042489946422E-06" izz="0.000232342664926296" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_6.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//armr_6.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="armr_6_joint" type="revolute">
+    <origin xyz="0 -0.0344999999999999 -0.0349999999999999" rpy="0 0 0" />
+    <parent link="armr_5" />
+    <child link="armr_6" />
+    <!-- <axis xyz="0 -1 0" /> -->
+    <axis xyz="0 1 0" />
+    <limit lower="-1.91" upper="1.91" effort="100" velocity="10" />
+  </joint>
+  <link name="armr_7">
+    <inertial>
+      <origin xyz="-0.02 0.005 -0.11" rpy="0 1.5708 0" />
+      <mass value="0.057895" />
+      <inertia ixx="5.31284716486342E-04" ixy="-5.62712638565237E-09" ixz="-1.29105518075557E-05" iyy="4.78030296269371E-04" iyz="-1.11926240474713E-08" izz="2.75793820465111E-04" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//armr_7.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.04 0 -0.08"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="armr_7_joint" type="revolute">
+    <origin xyz="0.0345000000000008 0.0345000000000001 -0.07" rpy="0 0 0" />
+    <parent link="armr_6" />
+    <child link="armr_7" />
+    <!-- <axis xyz="-1 0 0" /> -->
+    <axis xyz="1 0 0" />
+    <limit lower="-1.4" upper="1.4" effort="100" velocity="10" />
+  </joint>
+
+  <link name="neck_1">
+    <inertial>
+      <origin xyz="-3.98702122123355E-05 -0.00304670824111675 0.015155576535357" rpy="0 0 0" />
+      <mass value="0.069217783526509" />
+      <inertia ixx="6.53608744660416E-05" ixy="-5.77336143455897E-07" ixz="-1.62180434065858E-07" iyy="2.12658183651949E-05" iyz="-1.23898218783182E-05" izz="5.56066481947565E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//neck_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//neck_1.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="18_neck_yaw" type="revolute">
+    <origin xyz="0 0 0.452" rpy="0 0 0" />
+    <parent link="trunk_3" />
+    <child link="neck_1" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="8.9"
+      velocity="4.1887" />
+  </joint>
+  <link name="neck_2">
+    <inertial>
+      <origin xyz="0.00172478356124867 -0.0446289033206881 -7.00947686018694E-05" rpy="0 0 0" />
+      <mass value="0.549843917090051" />
+      <inertia ixx="0.000481918698095715" ixy="1.69169202254466E-06" ixz="4.10316365080914E-07" iyy="0.000270268494318136" iyz="-1.45573929346226E-06" izz="0.000510053007901269" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//neck_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//neck_2.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="19_neck_pitch" type="revolute">
+    <origin xyz="0.000667569374137766 0.0509956307062744 0.0389999999999999" rpy="0 0 0" />
+    <parent link="neck_1" />
+    <child link="neck_2" />
+    <axis xyz="0.0130895955713306 0.999914327574007 0" />
+    <limit
+      lower="-0.523"
+      upper="0.436"
+      effort="8.9"
+      velocity="4.1887" />
+  </joint>
+  <link name="neck_3">
+    <inertial>
+      <origin xyz="-0.0159416127304208 0.000310890008358008 0.0624254441319666" rpy="0 0 0" />
+      <mass value="0.777772649255018" />
+      <inertia ixx="0.000477816990390545" ixy="4.75152319679099E-06" ixz="1.34920289119043E-05" iyy="0.000570422598002522" iyz="1.36708605039103E-07" izz="0.000587043924022094" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//neck_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//neck_3.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="20_neck_roll" type="revolute">
+    <origin xyz="0.0333033385722358 -0.0534405056108477 0" rpy="0 0 0" />
+    <parent link="neck_2" />
+    <child link="neck_3" />
+    <axis xyz="-0.999914327574007 0.0130895955713292 0" />
+    <limit
+      lower="-0.436"
+      upper="0.436"
+      effort="8.9"
+      velocity="4.1887" />
+  </joint>
+  <link name="legl_1">
+    <inertial>
+      <origin xyz="0.065306 2.8935E-06 -0.0090362" rpy="0 0 0" />
+      <mass value="1.3953" />
+      <inertia ixx="0.0012922" ixy="2.3725E-09" ixz="-1.2217E-05" iyy="0.0019846" iyz="1.1154E-08" izz="0.0029019" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legl_1.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="21_left_hip_roll" type="revolute">
+    <origin xyz="-0.062 0.109 -0.0425" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="legl_1" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-0.785"
+      upper="0.785"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legl_2">
+    <inertial>
+      <origin xyz="-0.0031207 0.0016037 -0.11142" rpy="0 0 0" />
+      <mass value="2.168" />
+      <inertia ixx="0.0021973" ixy="-6.6635E-06" ixz="-0.00030325" iyy="0.0039115" iyz="-3.4036E-05" izz="0.0022264" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legl_2.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="22_left_hip_yaw" type="revolute">
+    <origin xyz="0.065 0 0" rpy="0 0 0" />
+    <parent link="legl_1" />
+    <child link="legl_2" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-0.68"
+      upper="0.68"
+      effort="94.7"
+      velocity="16.4200576" />
+  </joint>
+  <link name="legl_3">
+    <inertial>
+      <origin xyz="0.0038408 0.0051472 -0.15541" rpy="0 0 0" />
+      <mass value="1.9809" />
+      <inertia ixx="0.025151" ixy="4.1253E-06" ixz="1.1239E-05" iyy="0.026967" iyz="9.386E-07" izz="0.003041" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0.01 -0.15"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.06"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="23_left_hip_pitch" type="revolute">
+    <origin xyz="0 0 -0.12525" rpy="0 0 0" />
+    <parent link="legl_2" />
+    <child link="legl_3" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.64"
+      upper="0.872"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legl_4">
+    <inertial>
+      <origin xyz="-0.00065065 0.0010187 -0.11515" rpy="0 0 0" />
+      <mass value="4.3268" />
+      <inertia ixx="0.022943" ixy="8.3961E-06" ixz="-0.0008955" iyy="0.024067" iyz="6.2806E-05" izz="0.004543" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 -0.22"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.22" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="24_left_knee_pitch" type="revolute">
+    <origin xyz="0 0 -0.31" rpy="0 0 0" />
+    <parent link="legl_3" />
+    <child link="legl_4" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-0.174"
+      upper="2"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legl_5">
+    <inertial>
+      <origin xyz="2.0643E-08 1.6583E-09 2.7299E-09" rpy="0 0 0" />
+      <mass value="0.27113" />
+      <inertia ixx="2.1451E-04" ixy="8.7887E-12" ixz="5.8304E-12" iyy="2.1451E-04" iyz="-2.5349E-11" izz="2.4298E-04" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legl_5.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="25_left_ankle_pitch" type="revolute">
+    <origin xyz="0 0 -0.38" rpy="0 0 0" />
+    <parent link="legl_4" />
+    <child link="legl_5" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-0.698132"
+      upper="0.261799"
+      effort="100"
+      velocity="6" />
+  </joint>
+  <link name="legl_6">
+    <inertial>
+      <origin xyz="0.038689 -8.7883E-07 -0.053215" rpy="0 0 0" />
+      <mass value="1.0486" />
+      <inertia ixx="0.00068941" ixy="-4.3291E-08" ixz="0.00042439" iyy="0.0053972" iyz="-9.3564E-09" izz="0.0054238" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legl_6.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legl_6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="26_left_ankle_roll" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="legl_5" />
+    <child link="legl_6" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-0.174533"
+      upper="0.174533"
+      effort="50"
+      velocity="12" />
+  </joint>
+  <link name="legr_1">
+    <inertial>
+      <origin xyz="0.065306 2.8935E-06 -0.0090362" rpy="0 0 0" />
+      <mass value="1.3953" />
+      <inertia ixx="0.0012922" ixy="2.3532E-09" ixz="-1.2217E-05" iyy="0.0019846" iyz="1.1167E-08" izz="0.0029019" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legr_1.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="27_right_hip_roll" type="revolute">
+    <origin xyz="-0.062 -0.109 -0.0425" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="legr_1" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-0.785"
+      upper="0.785"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legr_2">
+    <inertial>
+      <origin xyz="-0.0031204 -0.0016038 -0.11142" rpy="0 0 0" />
+      <mass value="2.168" />
+      <inertia ixx="0.0021972" ixy="6.6672E-06" ixz="-0.00030325" iyy="0.0039115" iyz="3.4031E-05" izz="0.0022264" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legr_2.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="28_right_hip_yaw" type="revolute">
+    <origin xyz="0.065 0 0" rpy="0 0 0" />
+    <parent link="legr_1" />
+    <child link="legr_2" />
+    <axis xyz="0 0 1" />
+    <limit
+      lower="-0.68"
+      upper="0.68"
+      effort="94.7"
+      velocity="16.4200576" />
+  </joint>
+  <link name="legr_3">
+    <inertial>
+      <origin xyz="0.0038369 -0.0051368 -0.15546" rpy="0 0 0" />
+      <mass value="1.9809" />
+      <inertia ixx="0.025139" ixy="-4.1525E-06" ixz="1.0548E-05" iyy="0.026953" iyz="-1.6491E-06" izz="0.0030392" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 -0.01 -0.15"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.06"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="29_right_hip_pitch" type="revolute">
+    <origin xyz="0 0 -0.12525" rpy="0 0 0" />
+    <parent link="legr_2" />
+    <child link="legr_3" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-1.64"
+      upper="0.872"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legr_4">
+    <inertial>
+      <origin xyz="-0.00065022 -0.0010192 -0.11515" rpy="0 0 0" />
+      <mass value="4.3268" />
+      <inertia ixx="0.022943" ixy="-8.4456E-06" ixz="-0.00089562" iyy="0.024066" iyz="-6.263E-05" izz="0.0045439" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 -0.22"
+        rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.22" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="30_right_knee_pitch" type="revolute">
+    <origin xyz="0 0 -0.31" rpy="0 0 0" />
+    <parent link="legr_3" />
+    <child link="legr_4" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-0.174"
+      upper="2"
+      effort="146.0"
+      velocity="15.0461344" />
+  </joint>
+  <link name="legr_5">
+    <inertial>
+      <origin xyz="-1.6584E-09 -2.0643E-08 -2.7299E-09" rpy="0 0 0" />
+      <mass value="0.27113" />
+      <inertia ixx="2.1451E-04" ixy="8.7887E-12" ixz="-2.5349E-11" iyy="2.1451E-04" iyz="5.8304E-12" izz="2.4298E-04" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.68627 0.68627 0.68627 1" />
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legr_5.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="31_right_ankle_pitch" type="revolute">
+    <origin xyz="0 0 -0.38" rpy="0 0 0" />
+    <parent link="legr_4" />
+    <child link="legr_5" />
+    <axis xyz="0 1 0" />
+    <limit
+      lower="-0.698132"
+      upper="0.261799"
+      effort="100"
+      velocity="6" />
+  </joint>
+  <link name="legr_6">
+    <inertial>
+      <origin xyz="0.038689 -8.7883E-07 -0.053215" rpy="0 0 0" />
+      <mass value="1.0486" />
+      <inertia ixx="0.00068941" ixy="-4.3152E-08" ixz="0.00042439" iyy="0.0053972" iyz="-9.0649E-09" izz="0.0054238" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://qj2m_description/urdf/meshes//legr_6.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://qj2m_description/urdf/meshes//legr_6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="32_right_ankle_roll" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="legr_5" />
+    <child link="legr_6" />
+    <axis xyz="1 0 0" />
+    <limit
+      lower="-0.174533"
+      upper="0.174533"
+      effort="50"
+      velocity="12" />
+  </joint>
+  <link name="right_foot_fl" />  <joint name="right_foot_fl_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.14 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_fl" />
+  </joint>
+
+  <link name="right_foot_fr" />  <joint name="right_foot_fr_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.14 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_fr" />
+  </joint>
+
+  <link name="right_foot_ml" />  <joint name="right_foot_ml_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.045 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_ml" />
+  </joint>
+
+  <link name="right_foot_mr" />  <joint name="right_foot_mr_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.045 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_mr" />
+  </joint>
+
+  <link name="right_foot_bl" />  <joint name="right_foot_bl_joint" type="fixed" dont_collapse="true">
+    <origin xyz="-0.05 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_bl" />
+  </joint>
+
+  <link name="right_foot_br" />  <joint name="right_foot_br_joint" type="fixed" dont_collapse="true">
+    <origin xyz="-0.05 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legr_6" />
+    <child link="right_foot_br" />
+  </joint>
+
+  <link name="left_foot_fl" />  <joint name="left_foot_fl_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.14 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_fl" />
+  </joint>
+
+  <link name="left_foot_fr" />  <joint name="left_foot_fr_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.14 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_fr" />
+  </joint>
+
+  <link name="left_foot_ml" />  <joint name="left_foot_ml_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.045 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_ml" />
+  </joint>
+
+  <link name="left_foot_mr" />  <joint name="left_foot_mr_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.045 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_mr" />
+  </joint>
+
+  <link name="left_foot_bl" />  <joint name="left_foot_bl_joint" type="fixed" dont_collapse="true">
+    <origin xyz="-0.05 0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_bl" />
+  </joint>
+
+  <link name="left_foot_br" />  <joint name="left_foot_br_joint" type="fixed" dont_collapse="true">
+    <origin xyz="-0.05 -0.03 -0.078" rpy="0 0 0" />
+    <parent link="legl_6" />
+    <child link="left_foot_br" />
+  </joint>
+
+  <!-- D435i RGB
+       Parent: trunk_3
+       xyz: (0.09233, 0.0325, 0.48681) m
+       pitch +60° about Y → 红箭头(optical +Z)=相机朝向
+         与 trunk +Z 夹角 150°，与水平 +X 夹角 60°
+         view = [0.5, 0, -0.866025] -->
+  <link name="camera_color_frame">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.072" />
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.015" />
+      </geometry>
+      <material name="">
+        <color rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.015" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="trunk_camera_color_joint" type="fixed">
+    <origin xyz="0.092330 0.032500 0.486810" rpy="0 1.0471975512 0" />
+    <parent link="trunk_3" />
+    <child link="camera_color_frame" />
+  </joint>
+
+  <!-- 红箭头 = 相机朝向 = optical +Z -->
+  <link name="camera_color_optical_frame">
+    <visual>
+      <origin xyz="0 0 0.075" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.15" />
+      </geometry>
+      <material name="">
+        <color rgba="1.0 0.15 0.05 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.160" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.018 0.012" />
+      </geometry>
+      <material name="">
+        <color rgba="1.0 0.15 0.05 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.172" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.012 0.010" />
+      </geometry>
+      <material name="">
+        <color rgba="1.0 0.15 0.05 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.182" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.006 0.008" />
+      </geometry>
+      <material name="">
+        <color rgba="1.0 0.15 0.05 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="camera_color_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+    <parent link="camera_color_frame" />
+    <child link="camera_color_optical_frame" />
+  </joint>
+
+  <!-- Alias camera_link 不变 -->
+  <link name="camera_link" />
+  <joint name="camera_link_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="camera_color_frame" />
+    <child link="camera_link" />
+  </joint>
+
+</robot>

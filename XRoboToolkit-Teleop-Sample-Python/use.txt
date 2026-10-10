@@ -1,0 +1,2 @@
+cd /home/XRoboToolkit-Teleop-Sample-Python
+export PYTHONPATH=$PYTHONPATH:$(pwd)

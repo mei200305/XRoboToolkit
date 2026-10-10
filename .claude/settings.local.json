@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/utils/analyze_jitter.py arm_command_log_20260721_141226.csv)",
+      "Bash(python3 -c \"import py_compile; py_compile.compile\\('/home/agx02/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python/xrobotoolkit_teleop/hardware/interface/qj2m.py', doraise=True\\)\")",
+      "Bash(python3 -c \"import py_compile; py_compile.compile\\('/home/agx02/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python/xrobotoolkit_teleop/hardware/qj2m_teleop_controller.py', doraise=True\\)\")"
+    ]
+  }
+}

@@ -1,0 +1,367 @@
+QJ2M 遥操作算法结构 + 自主规划合并建议
+================================================================
+用途：给后续 agent 的只读参考。不要把自主规划做成第二个 /throw/arm_joint_command 发布者。
+日期：2026-08-22
+范围：真机 QJ2M 双臂遥操作（XRoboToolkit-Teleop-Sample-Python），拟加入视觉感知 + C++ 抓取规划。
+
+本文只描述现状与推荐合并方法，不要求立即改代码。
+
+
+----------------------------------------------------------------
+1. 一句话现状
+----------------------------------------------------------------
+PICO 手柄 grip 激活后，用相对位姿增量驱动 Placo IK，得到左右臂各 7 关节，
+再经唯一出口 QJ2MDualArmController 以约 50 Hz 发布 /throw/arm_joint_command。
+松手不停止发布：持续发上一拍 q_des，靠命令抱死姿态。
+回零/收纳已经是一种“非遥操接管同一出口”的模式，自主规划应沿用该模板，而不是另起发布者。
+
+
+----------------------------------------------------------------
+2. 关键文件（相对 XRoboToolkit-Teleop-Sample-Python/）
+----------------------------------------------------------------
+入口
+  scripts/hardware/teleop_qj2m_hardware.py
+      默认 control_rate_hz=50，enable_camera=False
+      启动 QJ2MTeleopController.run()
+
+基类 / 算法骨架
+  xrobotoolkit_teleop/common/base_teleop_controller.py
+      XR 客户端、delta 遥操、Placo IK、grip 滞回、follow 模式、yaw 对齐
+  xrobotoolkit_teleop/common/base_hardware_teleop_controller.py
+      线程：IK 线程、控制线程、日志线程、相机线程
+
+QJ2M 专用
+  xrobotoolkit_teleop/hardware/qj2m_teleop_controller.py
+      真机控制器：hold/re-grip、EMA、回零/收纳、手控制、发关节命令
+  xrobotoolkit_teleop/hardware/interface/qj2m.py
+      ROS2 封装：订状态、发 /throw/arm_joint_command
+  xrobotoolkit_teleop/utils/qj2m_homing.py
+      HOME/STOW/CMD 路点、最短角路径、分段插值
+  qj2m/arm_joint_topics.py
+      话题名与 28 维 JointState 打包（无 MuJoCo 依赖）
+      注意：此处 LEFT/RIGHT_ARM_KP 与 qj2m.py 不完全一致（见 4.4）
+
+手 / 相机
+  灵巧手：/chatter1、/chatter1_right（Int32MultiArray，6 维 0–1000）
+  日志相机（非感知）：RosCameraInterface，压缩图缩到 424x240
+  RealSense 直连封装：xrobotoolkit_teleop/hardware/interface/realsense.py
+      给 ARX 等用，QJ2M 真机默认未走这条
+
+URDF
+  assets/qj2m/urdf/qj2m_teleop.urdf
+  末端 link：左 arml_7，右 armr_7
+  关节名：arml_1_joint..arml_7_joint，armr_1_joint..armr_7_joint
+
+
+----------------------------------------------------------------
+3. 运行时结构
+----------------------------------------------------------------
+3.1 进程与线程（HardwareTeleopController.run）
+
+  主线程：等 stop
+  _ik_thread @ control_rate_hz
+      _update_robot_state()
+      _update_gripper_target()
+      _pre_ik_update()
+      _update_ik()          # QJ2M 在回零/未 grip 时会提前 return
+      可选 Placo 可视化
+  _control_thread @ control_rate_hz
+      _send_command()       # 唯一应写底层臂命令的地方
+  可选 _data_logging_thread：按钮与 ros2 bag
+  可选 _camera_thread：仅日志预览，默认关
+
+3.2 数据流
+
+  PICO (xrobotoolkit_sdk / XrClient)
+      grip / trigger / 摇杆 / 按钮 / 6D 位姿
+        -> BaseTeleopController._update_ik
+        -> Placo solver（末端 pose task + 很弱的 joints 正则）
+        -> placo_robot.state.q[左7, 右7]
+        -> QJ2MTeleopController._send_command
+        -> QJ2MDualArmController.publish_arm_command
+        -> /throw/arm_joint_command
+        -> 机器人 WBC / 底层关节伺服
+
+  状态回流
+      /motor/q2w_upper_motor_joint_state  (JointState, 32 motors)
+      左臂 index 3..9（电机 4–10），右臂 index 10..16（电机 11–17）
+      回零期间 _update_robot_state() 故意不读硬件，以免实测把轨迹冲掉
+
+3.3 控制频率
+
+  真机默认 50 Hz（脚本可改 --control-rate-hz）
+  qj2m/arm_joint_topics.py 里 ROS_HZ=500 是投壶脚本侧常量，不是当前遥操环频率
+  合并自主时出口频率应对齐控制环（50 Hz），内部规划可更高再抽样
+
+
+----------------------------------------------------------------
+4. 遥操作算法内容
+----------------------------------------------------------------
+4.1 Delta 遥操（核心）
+
+  不是绝对位姿跟随，而是相对增量：
+    上升沿 grip：记下
+      ref_ee_*        = 当前末端参考位姿（QJ2M 用最后命令的 FK，不是实测）
+      ref_controller_* = 当前手柄位姿
+    之后每拍：
+      delta = (当前手柄 - ref_controller) * scale_factor
+      经 R_headset_world 与动态 yaw 转到机器人世界系
+      软死区：位置 1 mm，旋转约 1.5°（立方 ease-in，避免硬切断）
+      目标末端 = ref_ee ⊕ delta
+      Placo 解 IK
+
+  grip 滞回：激活 >0.3，保持 >0.2，松开后必须再 grip
+
+  QJ2M 对基类的关键覆盖：
+    _get_activation_ee_pose / _get_inactive_ee_pose
+        用 _held_q 做 FK，不用重力塌陷后的实测
+    _post_ik_solve
+        非激活臂把 Placo q 写回 _held_q，防止 soft IK 漂移
+    _update_ik
+        回零中：直接 return
+        双臂都未 grip：不 solve，把 Placo 停在 _held_q，并 park 末端 task
+        仅当至少一侧 grip（或 follow 模式下右手 grip）才 super()._update_ik()
+
+  再 grip 不掉的充要条件：
+    _held_q_* 必须是“上一拍发出去的命令”，不是实测角。
+    自主切回遥操必须遵守同一约定。
+
+4.2 命令侧平滑与限幅
+
+  关节 EMA：alpha=0.35（越小越平滑）
+    上升沿用 _held_q 初始化 EMA，避免第一拍跳到 IK 解
+    松手：EMA 清空；q_des 冻结，继续发布（抱死）
+  发出前 clamp 到 URDF 限位（见 qj2m_teleop_controller.py 中
+    QJ2M_LEFT/RIGHT_ARM_LOWER/UPPER；肘 ±120°）
+  非激活臂：不改 q_des，继续发旧值
+
+4.3 Placo 任务
+
+  每臂末端 pose task（主任务）
+  joints_task 软正则：PREF_Q = [0.52, 0, 0, -2.09, 0, 0, 0] 双臂对称
+    权重 JOINTS_TASK_WEIGHT=5e-4，远小于末端
+  非臂关节全部 mask_dof
+  初始 seed：HOME_Q（WBC 默认），不是 PREF
+
+4.4 臂命令线协议（自主必须字节级兼容）
+
+  话题：/throw/arm_joint_command
+  类型：sensor_msgs/JointState
+  position 28 = [左q(7), 右q(7), 左kp(7), 右kp(7)]
+  velocity 28 = [左qd(7), 右qd(7), 左kd(7), 右kd(7)]
+  name = ARM_JOINT_NAMES（14 个，仅关节名；kp/kd 无 name）
+
+  当前实际发布实现：qj2m.py QJ2MDualArmController
+    默认 kp 左/右: [200, 180, 160, 200, 80, 80, 80]
+    默认 kd 左/右: [5, 4, 3, 3, 2, 2, 2]
+  qj2m/arm_joint_topics.py 中 kp 为 [200, 160, 160, 180, 80, 80, 80]
+    J2/J4 与 qj2m.py 不同。自主侧应跟随【真机正在发的那套】即 qj2m.py，
+    或先统一两处再接入规划。不要再引入第三套刚度。
+
+  打包辅助：qj2m/arm_joint_topics.py 的
+    build_arm_joint_command_arrays / build_arm_joint_command_msg
+
+4.5 灵巧手（与臂话题分离）
+
+  /chatter1、/chatter1_right : Int32MultiArray，6 个数
+  Trigger [0,1] 两段映射（_interp_hand_pos）：
+    [0, 0.5]：关节 2、3（及 0、1 视 open 模式）从 open → 1000
+    (0.5, 1]：关节 4 从 0 → 1000
+    关节 5 恒 700
+  MODE1（默认）：open = [1000,1000,0,0,0,700]  （0、1 保持闭合）
+  MODE2：open = [0,0,0,0,0,700]
+  Y 键切换 MODE1/MODE2
+  X 键锁左手 trigger；B 键锁右手 trigger（锁后保持最后位置）
+  旧话题 hand_control (String open/close) 仍在接口里，QJ2M 真机主路径已改用 chatter
+
+  自主抓取必须同时规划/发布手，并在自主期间禁止 trigger 抢手。
+
+4.6 已有“非遥操运动”（合并模板）
+
+  标志 _homing（命名历史原因，实际覆盖回零/收纳/多路点）
+  进入：_force_release_teleop()
+      active=False，ref_*=None，EMA 清空
+  轨迹：从【当前实测】插值到目标（回零用了实测作起点；遥操 hold 用命令。
+      见 8 节：自主建议改用 q_des 作起点，避免重力差造成第一段下沉）
+  最短角路径 + 限位：shortest_angular_path_safe
+  回零（左摇杆上，8 s）：左臂先、右臂后；每臂 J1–J3 再到 J4–J7
+  收纳（左摇杆下，5 s）：双臂同时到 STOW_Q_*
+  左摇杆右：CMD0→CMD→CMD2 三段，代码里暂时注释禁用
+  运动中：_update_ik 跳过；_update_robot_state 跳过；_send_command 走 _apply_homing
+  结束：_held_q = 目标命令；active 保持 False；必须再 grip；尝试 reset_yaw_alignment
+
+4.7 其它操作员功能
+
+  右摇杆上：toggle_follow_mode
+      右手柄只驱右臂世界 X/Z；Y 与姿态锁定；左臂跟右臂保持捕获时的 X/Z 偏移
+      切 follow 时清 EMA
+  右摇杆下：reset_yaw_alignment（操作员朝向对齐机器人 +X）
+  电机状态超时 3 s：启动时直接 exit；运行中 warn 并 hold
+  启动：等待第一帧电机状态，_held_q 与 q_des 用实测初始化，并做一次 yaw 对齐
+
+4.8 相机（现状 ≠ 感知）
+
+  enable_camera 默认 False
+  若打开：订 /camera_left|/camera_right/.../compressed，缩 424x240，无深度
+  仅 bag/预览。自主视觉不要复用这条路径。
+
+
+----------------------------------------------------------------
+5. 推荐合并方法（核心约束）
+----------------------------------------------------------------
+目标：视觉 + C++ 抓取规划，发出与遥操相同的关节角话题，并能丝滑切换。
+
+5.1 硬约束
+
+  1) 任意时刻最多一个写入者碰 /throw/arm_joint_command。
+     当前写入者是 _send_command → publish_arm_command。
+     C++ 规划器不要直接 advertise 该话题。
+  2) 交接用【最后发出的 q_des / _held_q】，不要用重力下的实测角
+     （除非明确要“贴实测”，那是另一条策略，会和现有 re-grip 行为冲突）。
+  3) 自主期间刷新 _held_q 与 Placo 状态，使再 grip 的 FK 参考连续。
+  4) 切模式时清 EMA，避免滤波器把第一拍拉回旧角。
+  5) 手话题一并纳入同一模式机，避免 trigger 与规划抢 /chatter1*。
+  6) kp/kd、关节名顺序、28 维布局与 qj2m.py 一致。
+  7) 限位与遥操同一套 QJ2M_*_ARM_LOWER/UPPER。
+
+5.2 推荐架构：遥操进程为唯一出口 + 内部规划源
+
+  感知节点（C++/Python，独立进程均可）
+      订 RealSense color + depth + camera_info（全分辨率，不要走日志压缩图）
+      输出物体/抓取位姿（需 camera→机器人基座或腕的 TF，必须先手眼标定）
+        ->
+  C++ 规划器（库或 ROS2 节点）
+      输入：当前 q_des（由仲裁器提供）、关节状态、抓取目标、URDF
+      输出：内部话题或 action，例如
+        /autonomy/arm_joint_command   同 28 维 JointState
+        /autonomy/left_hand、/autonomy/right_hand
+        或 FollowJointTrajectory / 自订 Grasp action
+      轨迹起点 = 调用瞬间的 q_des；若第一路点不同，规划器或仲裁器做 0.3–1 s 五次交接
+        ->
+  模式仲裁（放在 QJ2MTeleopController._send_command，或独立 mux 节点但必须是唯一底层发布者）
+      模式：HOLD | TELEOP | AUTONOMY | HOMING
+      每拍只选一路写入 arm_ctrl.q_des_* 再 publish
+        ->
+  /throw/arm_joint_command  +  /chatter1*
+
+  C++ 接入二选一（优先 A）：
+    A. pybind11：规划为库，遥操作进程内 plan()/sample(t)。切换最简单，复用 _homing 骨架。
+    B. 独立 ROS2 节点 + action：视觉/规划重、要崩溃隔离。遥操作订阅反馈并转发；
+       仍禁止规划节点直接发 /throw/arm_joint_command。
+
+5.3 模式机
+
+  HOLD（默认松手）
+      持续发冻结的 q_des；IK 不 solve；等人 grip 或触发自主/回零
+
+  TELEOP
+      现有 grip → delta IK → EMA → 发布
+      触发自主或回零时必须先 _force_release_teleop()
+
+  HOMING
+      保持现有回零/收纳，视为 AUTONOMY 的特例；互斥，不可叠
+
+  AUTONOMY
+      跳过 IK 与 trigger 手控（与 _homing 相同）
+      q_des = planner.sample(now)，clamp 后发布
+      同步 _held_q、Placo q、末端 task（拷贝 _apply_homing 后半）
+      结束：停在最后一拍，active=False，HOLD，等人再 grip
+      失败/超时：冻结当前 q_des，HOLD，不要发半截轨迹
+
+  打断优先级（建议）
+      急停 / 电机超时 hold  >  操作员 grip 接管  >  新自主请求  >  正在跑的自主  >  遥操
+      自主进行中再 grip = 立即冻结当前命令并切 TELEOP（或 HOLD 再等上升沿，二选一但要文档化）
+      回零进行中忽略新的自主请求（现有 _homing 已忽略重复回零）
+
+  按钮建议（现有空位）
+      左摇杆上/下：保持回零/收纳
+      左摇杆右：目前禁用，可挂“开始抓取”
+      自主中 grip：接管
+      另留一键取消自主回到 HOLD
+
+  分臂（第二阶段再做）
+      先整机互斥（与回零一样最安全）
+      若右臂自主、左臂遥操：规划器未控侧 7 维必须回放当前 q_des，禁止填 0 或填实测
+
+5.4 丝滑交接清单
+
+  遥操 → 自主
+      1. 拒绝条件：正在 HOMING；可选：grip 仍按着则先 force-release
+      2. q0 = _held_q（命令）
+      3. 把 q0 传给规划器当 start
+      4. 若 plan[0] 离 q0 远：短五次插值（可复用 sample_simultaneous_arms）
+      5. mode=AUTONOMY，清 EMA，跳过 IK
+      6. 每拍更新 _held_q
+
+  自主 → 遥操
+      1. 冻结当前 q_des → _held_q
+      2. 清 EMA、清 ref_*、active 按 grip 边沿进入
+      3. 再 grip 走现有 _get_activation_ee_pose（held 的 FK）
+      4. 手柄当前位置视为零增量，从自主停住的姿态接着动
+
+  禁止
+      两个节点同时发 /throw/arm_joint_command
+      用实测当轨迹起点或 re-grip 参考（会下沉/弹跳）
+      自主换一套 kp/kd
+      规划第一点远离 q_des 且无交接
+      自主不管手、trigger 仍在发
+      用 424x240 压缩日志图做 6D 估计
+      无 TF 时假设感知系 = Placo 世界系
+
+5.5 视觉与 C++ 规划挂载
+
+  RealSense RGB-D（独立订阅，全分辨率 + depth + camera_info）
+      -> C++ 感知：物体/6D/抓取候选
+  关节状态 + 与遥操相同的 URDF
+      -> C++ IK/轨迹：限位、（可选）碰撞
+      -> 关节轨迹 + 手开合时序（接近 / 合手 / 提起）
+      -> 仲裁器 50 Hz 抽样
+
+  规划失败：保持 HOLD，只打日志，不进 AUTONOMY。
+  标定：camera_optical → 机器人基座或腕，缺此外参则抓取位姿无法对齐 Placo。
+
+5.6 建议落地顺序
+
+  1. 模式枚举 + 唯一出口（先不接视觉）
+  2. 用固定关节轨迹（甚至复用回零插值）验证 TELEOP↔AUTONOMY 再 grip 不跳
+  3. 接手开合时序
+  4. C++ 规划以内部话题/action 接入，仍不直连底层话题
+  5. 手眼标定后再开闭环抓取
+  6. 最后才考虑分臂共享控制
+
+5.7 验收（给实现 agent）
+
+  - ros2 topic info /throw/arm_joint_command 始终只有 1 个 publisher
+  - 松手后命令连续、频率不掉
+  - 切自主：关节角连续，无第一拍阶跃；qd 有限
+  - 自主结束或中途 grip：末端不掉、不弹；再遥操从停下处增量运动
+  - 自主时扳 trigger 不影响手（或按设计仅急停）
+  - 回零与自主互斥
+  - kp/kd 与切模式前一致
+  - 规划崩溃时臂停在最后合法命令，遥操进程仍可接管
+
+
+----------------------------------------------------------------
+6. 给实现 agent 的最小改动提示（尚未实施）
+----------------------------------------------------------------
+优先改 qj2m_teleop_controller.py 的 _send_command / _update_ik / _update_robot_state，
+把 _homing 推广为 mode ∈ {TELEOP, HOMING, AUTONOMY}，不要改 BaseTeleopController 的 delta 逻辑。
+
+新规划代码：
+  不要新建第二个 QJ2MDualArmController 去发同一话题。
+  复用 build_arm_joint_command_msg 的布局，或直接写 arm_ctrl.q_des_*。
+  手：自主分支里跳过 trigger 循环，改为规划器给定 6 维。
+
+不要把感知塞进 _initialize_camera()：那是日志相机。
+
+
+----------------------------------------------------------------
+7. 相关但勿混淆的代码
+----------------------------------------------------------------
+  qj2m/throw_joint_quintic_*.py
+      投壶五次轨迹，可参考关节插值，但是独立脚本，不是遥操环的一部分
+  robotiq_and_realsense/
+      ROS1 Robotiq/RealSense 工作空间；当前 QJ2M 真机手是灵巧手 chatter，不是 Robotiq 主路径
+  docs/QJ2M_DEPLOYMENT_GUIDE.md
+      部署与旧关节名说明，部分话题名可能过时；以 qj2m.py 为准
+================================================================

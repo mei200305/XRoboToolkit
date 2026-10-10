@@ -1,0 +1,46 @@
+仿真运行步骤
+
+# 1. 激活环境
+source /opt/ros/humble/setup.bash
+
+# 2. 启动 PICO 服务（后台）
+cd /opt/apps/roboticsservice  
+bash runService.sh
+
+# 3. 运行 QJ2M 仿真（URDF: assets/qj2m/urdf/qj2m_teleop.urdf，源自 20260805 加长臂）
+
+cd /home/ubuntu/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python
+source /opt/ros/humble/setup.bash
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+export LD_LIBRARY_PATH="/home/ubuntu/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python/dependencies/XRoboToolkit-PC-Service-Pybind/lib/aarch64:/opt/apps/roboticsservice/SDK/arm64:$LD_LIBRARY_PATH"
+python3 scripts/simulation/teleop_qj2m_placo.py
+
+真机运行步骤
+
+# 1. 激活环境
+source /opt/ros/humble/setup.bash
+
+# 2. 启动 PICO 服务（若未启动）
+cd /opt/apps/roboticsservice  
+bash runService.sh
+
+# 3. 确保 ROS 2 + QJ2M 电机控制器已运行（不再需要 roscore）
+cd /home/ubuntu/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python
+source /opt/ros/humble/setup.bash
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+export LD_LIBRARY_PATH="/home/ubuntu/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python/dependencies/XRoboToolkit-PC-Service-Pybind/lib/aarch64:/opt/apps/roboticsservice/SDK/arm64:$LD_LIBRARY_PATH"
+python3 scripts/hardware/teleop_qj2m_hardware.py --control-rate-hz 50
+
+ros2 launch inspire_hand hands_control.launch.py
+# 4. 启动遥操作
+cd /home/ubuntu/XRoboToolkit/XRoboToolkit-Teleop-Sample-Python
+python scripts/hardware/teleop_qj2m_hardware.py --control-rate-hz 500
+
+平滑控制
+python scripts/hardware/teleop_qj2m_hardware.py --control-rate-hz 500
+
+# 带可视化调试:
+python scripts/hardware/teleop_qj2m_hardware.py --visualize-placo
+
+# 启动机器人
+使用tmux

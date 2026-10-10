@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<CycloneDDS>
+<Domain>
+    <General>
+    <Interfaces>
+        <NetworkInterface name="wlP1p1s0"/>
+        <NetworkInterface name="enx00e04c2a8298"/>
+        <NetworkInterface name="enx00e04c2c6198"/>    
+    </Interfaces>
+    </General>
+</Domain>
+</CycloneDDS>
